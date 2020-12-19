@@ -2,7 +2,7 @@
 const loading = new KTDialog({
     type: 'loader',
     placement: 'top center',
-    message: 'Loading ...',
+    message: 'Please wait ...',
 });
 
 // configure speedometer
@@ -158,7 +158,6 @@ myDropzone4.on('complete', (progress) => {
 // Setup the button for remove all files
 document.querySelector(`${id} .dropzone-remove-all`).onclick = function () {
     $(`${id} .dropzone-upload, ${id} .dropzone-remove-all`).css('display', 'none');
-    loading.show()
 
     // read .txt file into text
     var fr = new FileReader();
@@ -168,7 +167,7 @@ document.querySelector(`${id} .dropzone-remove-all`).onclick = function () {
         trim = _.map(val, str => {
             return str.trim()
         })
-
+        loading.show()
         let response = await fetch('https://n174tw3kkf.execute-api.us-east-2.amazonaws.com/default', {
             method: 'POST',
             headers: {
@@ -183,20 +182,24 @@ document.querySelector(`${id} .dropzone-remove-all`).onclick = function () {
         // calculate percentage
         // let percentage = data.body / trim.length * 100
         // console.log(Math.round(percentage))
-        document.getElementById('scored').textContent = data.body
-        if (data.body < 0) {
-            document.getElementById('tone').textContent = 'negative'
-        } else if (data.body == 0) {
-            document.getElementById('tone').textContent = 'neutral'
-        } else {
-            document.getElementById('tone').textContent = 'positive'
+        if(data.statusCode == 200){
+            loading.hide()
+            document.getElementById('scored').textContent = data.body
+            if (data.body < 0) {
+                document.getElementById('tone').textContent = 'negative'
+            } else if (data.body == 0) {
+                document.getElementById('tone').textContent = 'neutral'
+            } else {
+                document.getElementById('tone').textContent = 'positive'
+            }
+            gauge.set(data.body);
+        }else{
+            loading.hide()
         }
-        gauge.set(data.body);
     }
 
     fr.readAsText(myDropzone4.files[0]);
 
-    loading.hide()
     myDropzone4.removeAllFiles(true);
 };
 
@@ -232,15 +235,20 @@ submitBtn.addEventListener('click', async (e) => {
         })
     });
     const data = await response.json()
-    document.getElementById('scored').textContent = data.body
-    if (data.body < 0) {
-        document.getElementById('tone').textContent = 'negative'
-    } else if (data.body == 0) {
-        document.getElementById('tone').textContent = 'neutral'
-    } else {
-        document.getElementById('tone').textContent = 'positive'
+    if(data.statusCode == 200){
+        loading.hide()
+        document.getElementById('scored').textContent = data.body
+        if (data.body < 0) {
+            document.getElementById('tone').textContent = 'negative'
+        } else if (data.body == 0) {
+            document.getElementById('tone').textContent = 'neutral'
+        } else {
+            document.getElementById('tone').textContent = 'positive'
+        }
+        gauge.set(data.body);
+    }else{
+        loading.hide()
     }
-    gauge.set(data.body);
     // $('.resetBtn').click()
-    loading.hide()
+    // loading.hide()
 })
