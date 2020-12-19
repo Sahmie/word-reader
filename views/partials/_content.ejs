@@ -44,13 +44,14 @@
 							<textarea class="form-control analyze-text form-control-solid" rows="3"></textarea>
 						</div>
 
-						<div class="form-group col-lg-6 col-xl-6">
+						<div class="form-group col-lg-6 col-xl-6" style="text-align: center !important;">
 							<canvas id="canvas"></canvas>
+							<span class="form-text "> <b>Intepretation:</b> This text has a sentiment score of <span id="scored">0.0</span>. This means that the overall tone of this text is essentially <span id="tone">neutral</span></span>
 						</div>
 					</div>
 
 					<div class="form-group row">
-					<label for="exampleTextarea">Upload Text(.txt) File:</label>
+					<label for="exampleTextarea">Upload .txt File:</label>
 					<div class="col-lg-9">
 							<div class="dropzone dropzone-multi" id="kt_dropzone_4">
 									<div class="dropzone-panel mb-lg-0 mb-2">
@@ -94,7 +95,7 @@
 
 				<div class="card-footer">
 					<button type="button" class="btn analyze-btn btn-primary mr-2">Analyze Text</button>
-					<button type="reset" class="btn btn-secondary">Reset</button>
+					<button type="reset" class="btn btn-secondary resetBtn">Reset</button>
 				</div>
 			</form>
 			<!--end::Form-->
