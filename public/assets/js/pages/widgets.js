@@ -136,17 +136,6 @@ myDropzone4.on("addedfile", (file) => {
   $(`${id} .dropzone-remove-all`).css("display", "inline-block");
 });
 
-// Update the total progress bar
-// myDropzone4.on("totaluploadprogress", function (progress) {
-//   $(this).find(`${id} .progress-bar`).css("width", `${progress}%`);
-// });
-
-// myDropzone4.on("sending", (file) => {
-//   // Show the total progress bar when upload starts
-//   $(`${id} .progress-bar`).css("opacity", "1");
-//   // And disable the start button
-// });
-
 // Hide the total progress bar when nothing's uploading anymore
 myDropzone4.on("complete", (progress) => {
   const thisProgressBar = `${id} .dz-complete`;
@@ -156,13 +145,6 @@ myDropzone4.on("complete", (progress) => {
     ).css("opacity", "0");
   }, 300);
 });
-
-// Setup the buttons for all transfers
-
-// Setup the button for remove all files
-// document.querySelector(`${id} .dropzone-remove-all`).onclick = function () {
-
-// };
 
 // On all files completed upload
 myDropzone4.on("queuecomplete", (progress) => {
@@ -184,6 +166,7 @@ myDropzone4.on("removedfile", (file) => {
 
 const submitBtn = document.querySelector(".analyze-btn");
 let trim;
+let data;
 
 submitBtn.addEventListener("click", async (e) => {
   if (document.querySelector(".analyze-text").readOnly) {
@@ -202,34 +185,9 @@ submitBtn.addEventListener("click", async (e) => {
         return str.trim();
       });
       loading.show();
-      let response = await fetch(
-        "https://n174tw3kkf.execute-api.us-east-2.amazonaws.com/default",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            input_data: trim,
-          }),
-        }
-      );
-      const data = await response.json();
+      data = await sendApiRequest(trim);
 
-      if (data.statusCode == 200) {
-        loading.hide();
-        document.getElementById("scored").textContent = data.body;
-        if (data.body < 0) {
-          document.getElementById("tone").textContent = "negative";
-        } else if (data.body == 0) {
-          document.getElementById("tone").textContent = "neutral";
-        } else {
-          document.getElementById("tone").textContent = "positive";
-        }
-        gauge.set(data.body);
-      } else {
-        loading.hide();
-      }
+      handleResponse(data);
     };
 
     fr.readAsText(myDropzone4.files[0]);
@@ -242,35 +200,42 @@ submitBtn.addEventListener("click", async (e) => {
     const textBox = document.querySelector(".analyze-text").value;
     let splitValue = textBox.split(" ");
 
-    let response = await fetch(
-      "https://n174tw3kkf.execute-api.us-east-2.amazonaws.com/default",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          input_data: splitValue,
-        }),
-      }
-    );
-    const data = await response.json();
-    if (data.statusCode == 200) {
-      loading.hide();
-      document.getElementById("scored").textContent = data.body;
-      if (data.body < 0) {
-        document.getElementById("tone").textContent = "negative";
-      } else if (data.body == 0) {
-        document.getElementById("tone").textContent = "neutral";
-      } else {
-        document.getElementById("tone").textContent = "positive";
-      }
-      gauge.set(data.body);
-    } else {
-      loading.hide();
-    }
-  }
+    data = await sendApiRequest(splitValue);
 
-  // $('.resetBtn').click()
-  // loading.hide()
+    handleResponse(data);
+  }
 });
+
+function handleResponse(data) {
+  if (data.statusCode == 200) {
+    loading.hide();
+    document.getElementById("scored").textContent = data.body;
+    if (data.body < 0) {
+      document.getElementById("tone").textContent = "negative";
+    } else if (data.body == 0) {
+      document.getElementById("tone").textContent = "neutral";
+    } else {
+      document.getElementById("tone").textContent = "positive";
+    }
+    gauge.set(data.body);
+  } else {
+    loading.hide();
+  }
+}
+
+async function sendApiRequest(trim) {
+  let response = await fetch(
+    "https://n174tw3kkf.execute-api.us-east-2.amazonaws.com/default",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        input_data: trim,
+      }),
+    }
+  );
+  let data = await response.json();
+  return data;
+}
